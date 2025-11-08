@@ -37,10 +37,16 @@ if ($help) {
 
 # ==== Set defaults ====
 $BUILD_TYPE   = if ($dev) {"dev"} elseif ($release) {"release"} else {"dev"}
-$COMPRESS_FLAG = if ($compress) {"true"} elseif ($no_compress) {"false"} else {"false"}
-$ENFORCE_TAG   = if ($enforce_tag) {"true"} else {"false"}
-$SKIP_I18N     = if ($skip_i18n) {"true"} else {"false"}
-$LITE_FLAG     = if ($lite) {"true"} else {"false"}
+#$COMPRESS_FLAG = if ($compress) {"true"} elseif ($no_compress) {"false"} else {"false"}
+#$ENFORCE_TAG   = if ($enforce_tag) {"true"} else {"false"}
+#$SKIP_I18N     = if ($skip_i18n) {"true"} else {"false"}
+#$LITE_FLAG     = if ($lite) {"true"} else {"false"}
+
+$ENFORCE_TAG   = if ($enforce_tag) { $true } else { $false }
+$SKIP_I18N     = if ($skip_i18n) { $true } else { $false }
+$LITE_FLAG     = if ($lite) { $true } else { $false }
+$COMPRESS_FLAG = if ($compress) { $true } elseif ($no_compress) { $false } else { $false }
+
 
 # ==== Git Version ====
 try {
@@ -79,14 +85,14 @@ Step "==== Installing dependencies ===="
 pnpm install
 
 Step "==== Building i18n ===="
-if ($SKIP_I18N -eq "false") {
+if ($SKIP_I18N -eq $false) {
     pnpm run i18n:release
 } else {
     Warn "Skipping i18n build step (fetch not implemented in PowerShell version)"
 }
 
 Step "==== Building project ===="
-if ($LITE_FLAG -eq "true") {
+if ($LITE_FLAG -eq $true) {
     pnpm run build:lite
 } else {
     pnpm run build
@@ -98,7 +104,7 @@ Step "Writing version $version_tag to dist/VERSION ..."
 Success "Version file created"
 
 # ==== Compress ====
-if ($COMPRESS_FLAG -eq "true") {
+if ($COMPRESS_FLAG -eq $true) {
     Step "Creating compressed archive..."
     $archiveName = if ($LITE_FLAG -eq "true") {"openlist-frontend-dist-lite-$version_tag"} else {"openlist-frontend-dist-$version_tag"}
     Compress-Archive -Path "dist/*" -DestinationPath "dist/$archiveName.zip" -Force
